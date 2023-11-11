@@ -3,16 +3,18 @@ import pandas as pd
 import json
 import openai
 import base64
-import io
 
 # Initialize OpenAI API key
 openai_api_key = st.secrets["openai_apikey"]
 
 # Function to upload and display a file
 def upload_file():
-    uploaded_file = st.file_uploader("Choose a CSV file", type=["csv"])
+    uploaded_file = st.file_uploader("Choose a CSV or Parquet file", type=["csv", "parquet"])
     if uploaded_file is not None:
-        df = pd.read_csv(uploaded_file)
+        if uploaded_file.type == "text/csv":
+            df = pd.read_csv(uploaded_file)
+        elif uploaded_file.type == "application/octet-stream":
+            df = pd.read_parquet(uploaded_file, engine='pyarrow')
         st.write(df)
         return df
     return None
