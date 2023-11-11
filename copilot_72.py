@@ -42,15 +42,22 @@ def download_csv(df):
 # Function to send dataframe to GPT-4 for analysis
 def analyze_with_gpt4(df):
     if st.button('Analyze Data with GPT-4'):
-        # Preprocess the dataframe (e.g., summarize, select key columns) before sending
+        # Prepare a summary or key information from the dataframe
         summary = df.describe().to_json()  # Example: Sending a summary
-        response = openai.Completion.create(
-            engine="text-davinci-004",
-            prompt=f"Analyze this data: {summary}",
-            max_tokens=150,
+
+        # Construct the message for GPT-4
+        message = {"role": "system", "content": f"Analyze this data summary and provide insights: {summary}"}
+
+        # Send the data to GPT-4
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[message],
             api_key=openai_api_key
         )
-        st.write(response.choices[0].text)
+
+        # Display the response from GPT-4
+        st.write(response.choices[0].message['content'])
+
 
 if __name__ == "__main__":
     st.title("Data Transformation and Analysis App")
