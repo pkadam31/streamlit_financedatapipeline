@@ -56,7 +56,7 @@ def analyze_with_gpt4(df):
         )
 
         # Display the response from GPT-4
-        st.write(response.choices[0].message['content'])
+        st.write(response['choices'][0]['message']['content'])
 
 
 if __name__ == "__main__":
