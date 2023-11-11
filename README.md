@@ -1,1 +1,1 @@
-# streamlit_financedatapipeline
+# streamlit_finance_datapipeline
