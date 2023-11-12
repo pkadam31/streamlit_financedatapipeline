@@ -21,6 +21,8 @@ def upload_file():
 
 # Function to apply transformations from JSON
 def transform_dataframe(df):
+    st.subheader("Data Transformation")
+
     json_file = st.file_uploader("Upload JSON for transformation", type=["json"])
     if json_file is not None:
         transformations = json.load(json_file)
