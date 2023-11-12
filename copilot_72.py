@@ -34,20 +34,22 @@ def transform_dataframe(df):
 
 def aggregate_data(df):
     st.subheader("Data Aggregation")
-    agg_option = st.selectbox("Choose an aggregation operation", ["Count", "Average"])
 
-    if agg_option == "Count":
+    # Count operation
+    if st.button("Compute Count of Rows"):
         count = len(df)
         st.write(f"Count of rows in the DataFrame: {count}")
-    elif agg_option == "Average":
-        numeric_cols = df.select_dtypes(include=['float64', 'int64']).columns
-        if numeric_cols.empty:
-            st.write("No numeric columns available for average calculation.")
-        else:
-            column_to_avg = st.selectbox("Select a column to calculate the average", numeric_cols)
-            if column_to_avg:
-                average = df[column_to_avg].mean()
-                st.write(f"Average of {column_to_avg}: {average}")
+
+    # Average operation
+    st.write("Calculate Average of a Column")
+    numeric_cols = df.select_dtypes(include=['float64', 'int64']).columns
+    if numeric_cols.empty:
+        st.write("No numeric columns available for average calculation.")
+    else:
+        column_to_avg = st.selectbox("Select a column to calculate the average", numeric_cols)
+        if st.button("Compute Average"):
+            average = df[column_to_avg].mean()
+            st.write(f"Average of {column_to_avg}: {average}")
 
 # Function to download a dataframe as CSV
 def download_csv(df):
