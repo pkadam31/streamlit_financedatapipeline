@@ -31,6 +31,24 @@ def transform_dataframe(df):
         return df
     return df
 
+
+def aggregate_data(df):
+    st.subheader("Data Aggregation")
+    agg_option = st.selectbox("Choose an aggregation operation", ["Count", "Average"])
+
+    if agg_option == "Count":
+        count = len(df)
+        st.write(f"Count of rows in the DataFrame: {count}")
+    elif agg_option == "Average":
+        numeric_cols = df.select_dtypes(include=['float64', 'int64']).columns
+        if numeric_cols.empty:
+            st.write("No numeric columns available for average calculation.")
+        else:
+            column_to_avg = st.selectbox("Select a column to calculate the average", numeric_cols)
+            if column_to_avg:
+                average = df[column_to_avg].mean()
+                st.write(f"Average of {column_to_avg}: {average}")
+
 # Function to download a dataframe as CSV
 def download_csv(df):
     if st.button('Download Data as CSV'):
@@ -70,7 +88,8 @@ if __name__ == "__main__":
         df_transformed = transform_dataframe(df)
         if df_transformed is not None:
             # Download option for transformed dataframe
-            download_csv(df_transformed)
-
+            aggregate_data(df_transformed)
             # Analyze with GPT-4
             analyze_with_gpt4(df_transformed)
+            download_csv(df_transformed)
+
