@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import json
-import openai
+from openai import OpenAI
 import base64
 
 # Initialize OpenAI API key
@@ -44,12 +44,13 @@ def analyze_with_gpt4(df):
     if st.button('Analyze Data with GPT-4'):
         # Prepare a summary or key information from the dataframe
         summary = df.describe().to_json()  # Example: Sending a summary
+        client = OpenAI()
 
         # Construct the message for GPT-4
         message = {"role": "system", "content": f"Analyze this data summary and provide insights: {summary}"}
 
         # Send the data to GPT-4
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4",
             messages=[message],
             api_key=openai_api_key
