@@ -1,25 +1,72 @@
 import streamlit as st
 import pandas as pd
-import json
+import psycopg2
+import pyarrow
 from openai import OpenAI
 import base64
+import json
 
 # Initialize OpenAI API key
 openai_api_key = st.secrets["openai_apikey"]
+gcp_postgres_host = st.secrets["pg_host"]
+gcp_postgres_user = st.secrets["pg_user"]
+gcp_postgres_password = st.secrets["pg_password"]
+gcp_postgres_dbname = st.secrets["pg_db"]
+
+
+def get_db_connection():
+    """
+    Establishes a connection to the database using global connection parameters.
+    :return: The database connection object.
+    """
+    return psycopg2.connect(
+        host=gcp_postgres_host,
+        user=gcp_postgres_user,
+        password=gcp_postgres_password,
+        dbname=gcp_postgres_dbname
+    )
+
+
+def execute_sql_query(cursor, sql_query):
+    """
+    Executes the provided SQL query and returns the results.
+    :param cursor: The database cursor object.
+    :param sql_query: The SQL query to execute.
+    :return: A tuple containing the raw result and a DataFrame representation of the result.
+    """
+    cursor.execute(sql_query)
+    result = cursor.fetchall()
+    column_names = [desc[0] for desc in cursor.description]
+    return result, pd.DataFrame(result, columns=column_names)
+
+
+def close_db_connection(conn, cursor=None):
+    """
+    Closes the database connection and cursor if provided.
+    :param conn: The database connection object.
+    :param cursor: The database cursor object. Default is None.
+    """
+    if cursor:
+        cursor.close()
+    if conn:
+        conn.close()
 
 # Function to upload and display a file
 def upload_file():
+    st.subheader("Upload your data here")
+
     uploaded_file = st.file_uploader("Choose a CSV or Parquet file", type=["csv", "parquet"])
     if uploaded_file is not None:
         if uploaded_file.type == "text/csv":
             df = pd.read_csv(uploaded_file)
         elif uploaded_file.type == "application/octet-stream":
             df = pd.read_parquet(uploaded_file, engine='pyarrow')
-        st.write(df)
+        st.write(df.head(25))
+        st.write(df.dtypes)
         return df
     return None
 
-# Function to apply transformations from JSON
+
 def transform_dataframe(df):
     st.subheader("Data Transformation")
 
@@ -28,13 +75,20 @@ def transform_dataframe(df):
         transformations = json.load(json_file)
         for column, transform_list in transformations.items():
             for transform in transform_list:
-                if 'astype' in transform:
-                    df[column] = df[column].astype(transform['astype'])
-                elif 'map' in transform:
-                    # Apply map transformation with keeping original values for unspecified keys
+                if 'map' in transform:
+                    # Check if the column's data type is numeric
+                    if pd.api.types.is_numeric_dtype(df[column]):
+                        # Convert string keys in the map to the column's numeric type
+                        map_transformation = {df[column].dtype.type(k): v for k, v in transform['map'].items()}
+                    else:
+                        map_transformation = transform['map']
+
                     original_values = df[column].copy()
-                    df[column] = df[column].map(transform['map']).fillna(original_values)
-        st.write(df)
+                    df[column] = df[column].map(map_transformation).fillna(original_values)
+
+                elif 'astype' in transform:
+                    df[column] = df[column].astype(transform['astype'])
+        st.write(df.head(25))
         return df
     return df
 
@@ -87,7 +141,19 @@ def analyze_with_gpt4(df):
 
 
 if __name__ == "__main__":
-    st.title("Data Transformation and Analysis App")
+    st.markdown("""
+        <style>
+        .title {
+            color: navy;
+        }
+        .subheader {
+            color: navy;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+
+    st.title("Copilot72")
+    st.subheader("Our very own data-savvy AI Copilot to accelerate productivity!")
 
     # Upload and display file
     df = upload_file()
