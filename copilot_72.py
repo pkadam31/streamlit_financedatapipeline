@@ -21,15 +21,42 @@ def upload_file():
 
 # Function to apply transformations from JSON
 def transform_dataframe(df):
+    st.subheader("Data Transformation")
+
     json_file = st.file_uploader("Upload JSON for transformation", type=["json"])
     if json_file is not None:
-        transformation = json.load(json_file)
-        column = transformation["column"]
-        final_datatype = transformation["final_datatype"]
-        df[column] = df[column].astype(final_datatype)
+        transformations = json.load(json_file)
+        for column, transform_list in transformations.items():
+            for transform in transform_list:
+                if 'astype' in transform:
+                    df[column] = df[column].astype(transform['astype'])
+                elif 'map' in transform:
+                    # Apply map transformation with keeping original values for unspecified keys
+                    original_values = df[column].copy()
+                    df[column] = df[column].map(transform['map']).fillna(original_values)
         st.write(df)
         return df
     return df
+
+
+def aggregate_data(df):
+    st.subheader("Data Aggregation")
+
+    # Count operation
+    if st.button("Compute Count of Rows"):
+        count = len(df)
+        st.write(f"Count of rows in the DataFrame: {count}")
+
+    # Average operation
+    st.write("Calculate Average of a Column")
+    numeric_cols = df.select_dtypes(exclude=['object', 'bool', 'datetime64[ns]']).columns
+    if numeric_cols.empty:
+        st.write("No numeric columns available for average calculation.")
+    else:
+        column_to_avg = st.selectbox("Select a column to calculate the average", numeric_cols)
+        if st.button("Compute Average"):
+            average = df[column_to_avg].mean()
+            st.write(f"Average of {column_to_avg}: {average}")
 
 # Function to download a dataframe as CSV
 def download_csv(df):
@@ -70,7 +97,8 @@ if __name__ == "__main__":
         df_transformed = transform_dataframe(df)
         if df_transformed is not None:
             # Download option for transformed dataframe
-            download_csv(df_transformed)
-
+            aggregate_data(df_transformed)
             # Analyze with GPT-4
             analyze_with_gpt4(df_transformed)
+            download_csv(df_transformed)
+
