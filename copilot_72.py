@@ -5,8 +5,9 @@ import pyarrow
 from openai import OpenAI
 import base64
 import json
+import os
 
-# Initialize OpenAI API key
+os.environ["STREAMLIT_SERVER_MAX_UPLOAD_SIZE"] = "2048"
 openai_api_key = st.secrets["openai_apikey"]
 gcp_postgres_host = st.secrets["pg_host"]
 gcp_postgres_user = st.secrets["pg_user"]
