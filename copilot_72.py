@@ -64,7 +64,7 @@ def upload_file():
         return df
     return None
 
-# Function to apply transformations from JSON
+
 def transform_dataframe(df):
     st.subheader("Data Transformation")
 
@@ -73,15 +73,22 @@ def transform_dataframe(df):
         transformations = json.load(json_file)
         for column, transform_list in transformations.items():
             for transform in transform_list:
-                if 'astype' in transform:
-                    df[column] = df[column].astype(transform['astype'])
-                elif 'map' in transform:
+                if 'map' in transform:
+                    # Check if the column's data type is numeric
+                    if pd.api.types.is_numeric_dtype(df[column]):
+                        # Convert string keys in the map to the column's numeric type
+                        map_transformation = {df[column].dtype.type(k): v for k, v in transform['map'].items()}
+                    else:
+                        map_transformation = transform['map']
+
                     original_values = df[column].copy()
-                    df[column] = df[column].map(transform['map']).fillna(original_values)
+                    df[column] = df[column].map(map_transformation).fillna(original_values)
+
+                elif 'astype' in transform:
+                    df[column] = df[column].astype(transform['astype'])
         st.write(df)
         return df
     return df
-
 
 
 def aggregate_data(df):
