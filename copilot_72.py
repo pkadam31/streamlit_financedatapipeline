@@ -1,11 +1,55 @@
 import streamlit as st
 import pandas as pd
-import json
+import psycopg2
+import pyarrow
 from openai import OpenAI
 import base64
+import json
 
 # Initialize OpenAI API key
 openai_api_key = st.secrets["openai_apikey"]
+gcp_postgres_host = st.secrets["pg_host"]
+gcp_postgres_user = st.secrets["pg_user"]
+gcp_postgres_password = st.secrets["pg_password"]
+gcp_postgres_dbname = st.secrets["pg_db"]
+
+
+def get_db_connection():
+    """
+    Establishes a connection to the database using global connection parameters.
+    :return: The database connection object.
+    """
+    return psycopg2.connect(
+        host=gcp_postgres_host,
+        user=gcp_postgres_user,
+        password=gcp_postgres_password,
+        dbname=gcp_postgres_dbname
+    )
+
+
+def execute_sql_query(cursor, sql_query):
+    """
+    Executes the provided SQL query and returns the results.
+    :param cursor: The database cursor object.
+    :param sql_query: The SQL query to execute.
+    :return: A tuple containing the raw result and a DataFrame representation of the result.
+    """
+    cursor.execute(sql_query)
+    result = cursor.fetchall()
+    column_names = [desc[0] for desc in cursor.description]
+    return result, pd.DataFrame(result, columns=column_names)
+
+
+def close_db_connection(conn, cursor=None):
+    """
+    Closes the database connection and cursor if provided.
+    :param conn: The database connection object.
+    :param cursor: The database cursor object. Default is None.
+    """
+    if cursor:
+        cursor.close()
+    if conn:
+        conn.close()
 
 # Function to upload and display a file
 def upload_file():
@@ -16,6 +60,7 @@ def upload_file():
         elif uploaded_file.type == "application/octet-stream":
             df = pd.read_parquet(uploaded_file, engine='pyarrow')
         st.write(df)
+        st.write(df.dtypes)
         return df
     return None
 
