@@ -47,7 +47,7 @@ def aggregate_data(df):
 
     # Average operation
     st.write("Calculate Average of a Column")
-    numeric_cols = df.select_dtypes(include=['float64', 'int64']).columns
+    numeric_cols = df.select_dtypes(exclude=['object', 'bool', 'datetime64[ns]']).columns
     if numeric_cols.empty:
         st.write("No numeric columns available for average calculation.")
     else:
