@@ -53,19 +53,19 @@ import os
 #         conn.close()
 #
 # # Function to upload and display a file
-# def upload_file():
-#     st.subheader("Upload your data here")
-#
-#     uploaded_file = st.file_uploader("Choose a CSV or Parquet file", type=["csv", "parquet"])
-#     if uploaded_file is not None:
-#         if uploaded_file.type == "text/csv":
-#             df = pd.read_csv(uploaded_file)
-#         elif uploaded_file.type == "application/octet-stream":
-#             df = pd.read_parquet(uploaded_file, engine='pyarrow')
-#         st.write(df.head(25))
-#         st.write(df.dtypes)
-#         return df
-#     return None
+def upload_file():
+    st.subheader("Upload your data here")
+
+    uploaded_file = st.file_uploader("Choose a CSV or Parquet file", type=["csv", "parquet"])
+    if uploaded_file is not None:
+        if uploaded_file.type == "text/csv":
+            df = pd.read_csv(uploaded_file)
+        elif uploaded_file.type == "application/octet-stream":
+            df = pd.read_parquet(uploaded_file, engine='pyarrow')
+        st.write(df.head(25))
+        st.write(df.dtypes)
+        return df
+    return None
 #
 #
 # def transform_dataframe(df):
@@ -157,7 +157,7 @@ if __name__ == "__main__":
     st.subheader("Our very own data-savvy AI Copilot to accelerate productivity!")
 
     # # Upload and display file
-    # df = upload_file()
+    df = upload_file()
     #
     # # Apply transformations if dataframe is uploaded
     # if df is not None:
