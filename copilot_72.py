@@ -23,10 +23,14 @@ def upload_file():
 def transform_dataframe(df):
     json_file = st.file_uploader("Upload JSON for transformation", type=["json"])
     if json_file is not None:
-        transformation = json.load(json_file)
-        column = transformation["column"]
-        final_datatype = transformation["final_datatype"]
-        df[column] = df[column].astype(final_datatype)
+        transformations = json.load(json_file)
+        for column, transform in transformations.items():
+            if 'astype' in transform:
+                # Convert column type
+                df[column] = df[column].astype(transform['astype'])
+            elif 'map' in transform:
+                # Map and transform cell values
+                df[column] = df[column].map(transform['map'])
         st.write(df)
         return df
     return df
