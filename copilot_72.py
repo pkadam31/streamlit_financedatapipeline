@@ -141,6 +141,17 @@ def analyze_with_gpt4(df):
 
 
 if __name__ == "__main__":
+    st.markdown("""
+        <style>
+        .title {
+            color: navy;
+        }
+        .subheader {
+            color: navy;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+    
     st.title("Copilot72")
     st.subheader("Our very own data-savvy AI Copilot to accelerate productivity!")
 
