@@ -61,7 +61,7 @@ def upload_file():
             df = pd.read_csv(uploaded_file)
         elif uploaded_file.type == "application/octet-stream":
             df = pd.read_parquet(uploaded_file, engine='pyarrow')
-        st.write(df)
+        st.write(df.head(25))
         st.write(df.dtypes)
         return df
     return None
@@ -88,7 +88,7 @@ def transform_dataframe(df):
 
                 elif 'astype' in transform:
                     df[column] = df[column].astype(transform['astype'])
-        st.write(df)
+        st.write(df.head(25))
         return df
     return df
 
@@ -151,7 +151,7 @@ if __name__ == "__main__":
         }
         </style>
         """, unsafe_allow_html=True)
-    
+
     st.title("Copilot72")
     st.subheader("Our very own data-savvy AI Copilot to accelerate productivity!")
 
