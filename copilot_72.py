@@ -76,12 +76,12 @@ def transform_dataframe(df):
                 if 'astype' in transform:
                     df[column] = df[column].astype(transform['astype'])
                 elif 'map' in transform:
-                    # Apply map transformation with keeping original values for unspecified keys
                     original_values = df[column].copy()
                     df[column] = df[column].map(transform['map']).fillna(original_values)
         st.write(df)
         return df
     return df
+
 
 
 def aggregate_data(df):
