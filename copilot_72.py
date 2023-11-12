@@ -44,7 +44,7 @@ def analyze_with_gpt4(df):
     if st.button('Analyze Data with GPT-4'):
         # Prepare a summary or key information from the dataframe
         summary = df.describe().to_json()  # Example: Sending a summary
-        client = OpenAI()
+        client = OpenAI(api_key=openai_api_key)
 
         # Construct the message for GPT-4
         message = {"role": "system", "content": f"Analyze this data summary and provide insights: {summary}"}
@@ -52,8 +52,7 @@ def analyze_with_gpt4(df):
         # Send the data to GPT-4
         response = client.chat.completions.create(
             model="gpt-4",
-            messages=[message],
-            api_key=openai_api_key
+            messages=[message]
         )
 
         # Display the response from GPT-4
