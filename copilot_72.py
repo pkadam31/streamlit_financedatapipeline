@@ -24,13 +24,14 @@ def transform_dataframe(df):
     json_file = st.file_uploader("Upload JSON for transformation", type=["json"])
     if json_file is not None:
         transformations = json.load(json_file)
-        for column, transform in transformations.items():
-            if 'astype' in transform:
-                # Convert column type
-                df[column] = df[column].astype(transform['astype'])
-            elif 'map' in transform:
-                # Map and transform cell values
-                df[column] = df[column].map(transform['map'])
+        for column, transform_list in transformations.items():
+            for transform in transform_list:
+                if 'astype' in transform:
+                    df[column] = df[column].astype(transform['astype'])
+                elif 'map' in transform:
+                    # Apply map transformation with keeping original values for unspecified keys
+                    original_values = df[column].copy()
+                    df[column] = df[column].map(transform['map']).fillna(original_values)
         st.write(df)
         return df
     return df
