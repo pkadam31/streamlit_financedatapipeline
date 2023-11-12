@@ -53,6 +53,8 @@ def close_db_connection(conn, cursor=None):
 
 # Function to upload and display a file
 def upload_file():
+    st.subheader("Upload your data here")
+
     uploaded_file = st.file_uploader("Choose a CSV or Parquet file", type=["csv", "parquet"])
     if uploaded_file is not None:
         if uploaded_file.type == "text/csv":
@@ -139,7 +141,8 @@ def analyze_with_gpt4(df):
 
 
 if __name__ == "__main__":
-    st.title("Data Transformation and Analysis App")
+    st.title("Copilot72")
+    st.subheader("Our very own data-savvy AI Copilot to accelerate productivity!")
 
     # Upload and display file
     df = upload_file()
