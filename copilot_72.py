@@ -112,7 +112,7 @@ def transform_dataframe(df):
 
     with col2:
         st.write("Transformed DataFrame:")
-        st.dataframe(df_transformed)
+        st.dataframe(df_transformed.head(10))
 
     return df_transformed
 
