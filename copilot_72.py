@@ -34,10 +34,14 @@ def create_table_in_postgres(df, table_name):
         safe_username = quote_plus(gcp_postgres_user)
         safe_password = quote_plus(gcp_postgres_password)
 
+        st.write(safe_username)
+        st.write(safe_password)
+
         engine = sqlalchemy.create_engine(
             f'postgresql+psycopg2://{safe_username}:{safe_password}'
             f'@{gcp_postgres_host}/{gcp_postgres_dbname}'
         )
+
         df.to_sql(table_name, engine, if_exists='append', index=False)
         st.success(f"Table '{table_name}' updated successfully in PostgreSQL")
     except Exception as e:
