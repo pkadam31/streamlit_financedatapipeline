@@ -76,31 +76,26 @@ def transform_dataframe(df):
     if json_file:
         transformations = json.load(json_file)
 
-        # Apply astype transformations
         if 'astype' in transformations:
             for column, dtype in transformations['astype'].items():
                 df_transformed[column] = df_transformed[column].astype(dtype)
 
-        # Apply map transformations
         if 'map' in transformations:
             for column, mapping in transformations['map'].items():
-                df_transformed[column] = df_transformed[column].map(mapping)
+                original_dtype = df_transformed[column].dtype
+                df_transformed[column] = df_transformed[column].astype(str).map(mapping).astype(original_dtype)
 
-        # Apply fillna transformations
-        if 'fillna' in transformations:
-            for column, value in transformations['fillna'].items():
-                df_transformed[column] = df_transformed[column].fillna(value)
-
-        # Apply drop_duplicates
         if transformations.get('drop_duplicates'):
             df_transformed = df_transformed.drop_duplicates()
 
-        # Apply sort_values
         if 'sort_values' in transformations:
             sort_params = transformations['sort_values']
             df_transformed = df_transformed.sort_values(by=sort_params['by'], ascending=sort_params['ascending'])
 
-        # Apply rename transformations
+        if 'fillna' in transformations:
+            for column, value in transformations['fillna'].items():
+                df_transformed[column] = df_transformed[column].fillna(value)
+
         if 'rename' in transformations:
             df_transformed = df_transformed.rename(columns=transformations['rename'])
 
