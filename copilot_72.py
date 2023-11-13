@@ -40,8 +40,10 @@ def create_table_in_postgres(df, table_name):
             f'postgresql+psycopg2://{safe_username}:{safe_password}@{safe_host}/{safe_dbname}'
         )
 
-        df.to_sql(table_name, engine, if_exists='append', index=False)
+        chunksize = int(len(df)/ 10)
+        df.to_sql(table_name, engine, if_exists='append', index=False, chunksize=chunksize)
         st.success(f"Table '{table_name}' updated successfully in PostgreSQL")
+
     except Exception as e:
         st.error(f"An error occurred: {e}")
 
