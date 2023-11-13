@@ -241,7 +241,8 @@ if __name__ == "__main__":
                            'or unobfuscated state.')
                 if st.checkbox('I confirm that no sensitive data is being published in plain form'):
                     table_name = st.text_input("Enter the name of the table to create in PostgreSQL:")
-                    if table_name:
-                        create_table_in_postgres(df, table_name)
-                    else:
-                        st.error("Please enter a table name.")
+                    if st.button('Publish table'):
+                        if table_name:
+                            create_table_in_postgres(df, table_name)
+                        else:
+                            st.error("Please enter a table name.")
