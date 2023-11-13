@@ -86,6 +86,11 @@ def transform_dataframe(df):
             for column, mapping in transformations['map'].items():
                 df_transformed[column] = df_transformed[column].map(mapping)
 
+        # Apply fillna transformations
+        if 'fillna' in transformations:
+            for column, value in transformations['fillna'].items():
+                df_transformed[column] = df_transformed[column].fillna(value)
+
         # Apply drop_duplicates
         if transformations.get('drop_duplicates'):
             df_transformed = df_transformed.drop_duplicates()
@@ -103,7 +108,7 @@ def transform_dataframe(df):
     col1, col2 = st.columns(2)
     with col1:
         st.write("Original DataFrame (Top 10 Rows):")
-        st.dataframe(df.head(10))
+        st.dataframe(df)
 
     with col2:
         st.write("Transformed DataFrame:")
