@@ -42,10 +42,9 @@ def create_table_in_postgres(df, table_name):
 
 def upload_file():
     """
-        Uploads a CSV or Parquet file using Streamlit's file uploader and displays its content.
-
-        :return: The DataFrame created from the uploaded file, or None if no file is uploaded.
-        """
+    Uploads a CSV or Parquet file using Streamlit's file uploader and displays its content.
+    :return: The DataFrame created from the uploaded file, or None if no file is uploaded.
+    """
     st.subheader("Upload your data here")
 
     uploaded_file = st.file_uploader("Choose a CSV or Parquet file", type=["csv", "parquet"])
@@ -84,7 +83,6 @@ def transform_dataframe(df):
 
     sample_transformations = load_app_config()
     sample_transformations_str = json.dumps(sample_transformations, indent=4)
-
     st.download_button("Download Sample JSON file", sample_transformations_str, "sample_transformation.json",
                        "text/plain")
 
@@ -231,17 +229,34 @@ if __name__ == "__main__":
         df_transformed = transform_dataframe(df)
         if df_transformed is not None:
             aggregate_data(df_transformed)
+            st.subheader("Copilot AI Data Analysis")
             analyze_with_gpt4(df_transformed)
+            st.subheader("Data Export")
             download_csv(df_transformed)
 
-            st.subheader("Update the DB - create or append to the copilot72db")
-            table_name = st.text_input("Enter the name of the table to create in PostgreSQL:")
+            st.subheader("Update the DB - create or append your data into the Copilot72DB")
+
+            if 'create_clicked' not in st.session_state:
+                st.session_state.create_clicked = False
+            if 'confirm_sensitive_data' not in st.session_state:
+                st.session_state.confirm_sensitive_data = False
+
             if st.button('Create table in postgres'):
-                # Check to make users are aware of sensitive data's - sensitivity
-                st.warning('Please confirm that no PII, PHI, or CCI data is present in an unencrypted '
-                           'or unobfuscated state.')
-                if st.checkbox('I confirm that no sensitive data is being published in plain form'):
-                    if table_name:
+                st.session_state.create_clicked = True
+
+            if st.session_state.create_clicked:
+                st.warning(
+                    'Please confirm that no PII, PHI, or CCI data is present in an unencrypted or unobfuscated state.')
+                if st.checkbox('I confirm that no sensitive data is being published in plain form',
+                               key='confirm_sensitive_data'):
+                    st.session_state.confirm_sensitive_data = True
+                else:
+                    st.session_state.confirm_sensitive_data = False
+
+            if st.session_state.confirm_sensitive_data:
+                table_name = st.text_input("Enter the name of the table to create in PostgreSQL:")
+                if table_name:  # Check if table_name is not empty
+                    if st.button('Publish table'):
                         create_table_in_postgres(df, table_name)
-                    else:
-                        st.error("Please enter a table name.")
+                else:
+                    st.error("Please enter a table name.")
