@@ -69,27 +69,47 @@ def upload_file():
 def transform_dataframe(df):
     st.subheader("Data Transformation")
 
+    df_transformed = df.copy()
+    df = df.head(10)
+
     json_file = st.file_uploader("Upload JSON for transformation", type=["json"])
     if json_file is not None:
         transformations = json.load(json_file)
-        for column, transform_list in transformations.items():
-            for transform in transform_list:
-                if 'map' in transform:
-                    # Check if the column's data type is numeric
-                    if pd.api.types.is_numeric_dtype(df[column]):
-                        # Convert string keys in the map to the column's numeric type
-                        map_transformation = {df[column].dtype.type(k): v for k, v in transform['map'].items()}
-                    else:
-                        map_transformation = transform['map']
 
-                    original_values = df[column].copy()
-                    df[column] = df[column].map(map_transformation).fillna(original_values)
+        # Apply astype transformations
+        if 'astype' in transformations:
+            for column, dtype in transformations['astype'].items():
+                df_transformed[column] = df_transformed[column].astype(dtype)
 
-                elif 'astype' in transform:
-                    df[column] = df[column].astype(transform['astype'])
-        st.write(df.head(25))
-        return df
-    return df
+        # Apply map transformations
+        if 'map' in transformations:
+            for column, mapping in transformations['map'].items():
+                df_transformed[column] = df_transformed[column].map(mapping)
+
+        # Apply drop_duplicates
+        if transformations.get('drop_duplicates'):
+            df_transformed = df_transformed.drop_duplicates()
+
+        # Apply sort_values
+        if 'sort_values' in transformations:
+            sort_params = transformations['sort_values']
+            df_transformed = df_transformed.sort_values(by=sort_params['by'], ascending=sort_params['ascending'])
+
+        # Apply rename transformations
+        if 'rename' in transformations:
+            df_transformed = df_transformed.rename(columns=transformations['rename'])
+
+    # Display the original top 10 rows for comparison
+    col1, col2 = st.columns(2)
+    with col1:
+        st.write("Original DataFrame (Top 10 Rows):")
+        st.dataframe(df.head(10))
+
+    with col2:
+        st.write("Transformed DataFrame:")
+        st.dataframe(df_transformed)
+
+    return df_transformed
 
 
 def aggregate_data(df):
