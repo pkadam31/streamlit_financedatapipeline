@@ -1,8 +1,6 @@
 import sqlalchemy
 import streamlit as st
 import pandas as pd
-import psycopg2
-import pyarrow
 from urllib.parse import quote_plus
 from openai import OpenAI
 import base64
@@ -15,20 +13,14 @@ gcp_postgres_password = st.secrets["pg_password"]
 gcp_postgres_dbname = st.secrets["pg_db"]
 
 
-def get_db_connection():
-    """
-    Establishes a connection to the database using global connection parameters.
-    :return: The database connection object.
-    """
-    return psycopg2.connect(
-        host=gcp_postgres_host,
-        user=gcp_postgres_user,
-        password=gcp_postgres_password,
-        dbname=gcp_postgres_dbname
-    )
-
-
 def create_table_in_postgres(df, table_name):
+    """
+        Uploads a pandas DataFrame to a PostgreSQL database as a new or appended table.
+
+        :param df: DataFrame to be uploaded.
+        :param table_name: Name of the table to create or append in the database.
+        :return: None. Displays success or error message in Streamlit.
+        """
     try:
 
         safe_username = quote_plus(gcp_postgres_user)
@@ -39,8 +31,8 @@ def create_table_in_postgres(df, table_name):
         engine = sqlalchemy.create_engine(
             f'postgresql+psycopg2://{safe_username}:{safe_password}@{safe_host}/{safe_dbname}'
         )
-
-        chunksize = int(len(df)/ 10)
+        # Breaks large files into chunks for a more fault-tolerant data transfer
+        chunksize = int(len(df) / 10)  # TODO: len(df) done twice
         df.to_sql(table_name, engine, if_exists='append', index=False, chunksize=chunksize)
         st.success(f"Table '{table_name}' updated successfully in PostgreSQL")
 
@@ -48,19 +40,12 @@ def create_table_in_postgres(df, table_name):
         st.error(f"An error occurred: {e}")
 
 
-def close_db_connection(conn, cursor=None):
-    """
-    Closes the database connection and cursor if provided.
-    :param conn: The database connection object.
-    :param cursor: The database cursor object. Default is None.
-    """
-    if cursor:
-        cursor.close()
-    if conn:
-        conn.close()
-
-# Function to upload and display a file
 def upload_file():
+    """
+        Uploads a CSV or Parquet file using Streamlit's file uploader and displays its content.
+
+        :return: The DataFrame created from the uploaded file, or None if no file is uploaded.
+        """
     st.subheader("Upload your data here")
 
     uploaded_file = st.file_uploader("Choose a CSV or Parquet file", type=["csv", "parquet"])
@@ -75,8 +60,33 @@ def upload_file():
     return None
 
 
+def load_app_config():
+    """
+    Loads application configuration from a JSON file.
+    :return: A dictionary containing configuration data.
+    """
+    with open('sample_transformation.json') as config_file:
+        return json.load(config_file)
+
+
 def transform_dataframe(df):
+    """
+    Transforms a DataFrame based on user-provided JSON configurations.
+
+    The function allows users to upload a JSON file specifying various
+    transformations (like fillna, astype, map, etc.) to be applied to the DataFrame.
+    It also displays the original and transformed DataFrame for comparison.
+
+    :param df: The original pandas DataFrame to be transformed.
+    :return: A transformed pandas DataFrame based on the JSON configurations.
+    """
     st.subheader("Data Transformation")
+
+    sample_transformations = load_app_config()
+    sample_transformations_str = json.dumps(sample_transformations, indent=4)
+
+    st.download_button("Download Sample JSON file", sample_transformations_str, "sample_transformation.json",
+                       "text/plain")
 
     df_transformed = df.copy()
     df = df.head(10)
@@ -127,6 +137,17 @@ def transform_dataframe(df):
 
 
 def aggregate_data(df):
+    """
+    Performs basic aggregation operations (count of rows, average of a column) on a DataFrame.
+
+    The function allows users to interactively compute the count of rows in the DataFrame
+    and calculate the average of a selected numeric column. It uses Streamlit widgets for
+    user interaction and displays the results.
+
+    :param df: The pandas DataFrame on which aggregation operations will be performed.
+    :return: None. The function outputs results directly to the Streamlit interface.
+    """
+
     st.subheader("Data Aggregation")
 
     # Count operation
@@ -145,25 +166,43 @@ def aggregate_data(df):
             average = df[column_to_avg].mean()
             st.write(f"Average of {column_to_avg}: {average}")
 
-# Function to download a dataframe as CSV
+
 def download_csv(df):
+    """
+    Enables downloading the provided DataFrame as a CSV file.
+
+    The function creates a download link in the Streamlit interface, allowing users to
+    download the current state of the DataFrame in CSV format.
+
+    :param df: The pandas DataFrame to be downloaded as CSV.
+    :return: None. The function creates a download link in the Streamlit interface.
+    """
     if st.button('Download Data as CSV'):
         csv = df.to_csv(index=False)
         b64 = base64.b64encode(csv.encode()).decode()
         href = f'<a href="data:file/csv;base64,{b64}" download="transformed_data.csv">Download CSV File</a>'
         st.markdown(href, unsafe_allow_html=True)
 
-# Function to send dataframe to GPT-4 for analysis
+
 def analyze_with_gpt4(df):
+    """
+    Sends a DataFrame's summary to GPT-4 for analysis and displays the response.
+
+    The function summarizes the DataFrame using df.describe(include='all'), converts this summary
+    to JSON, and sends it to GPT-4 for analysis. The response from GPT-4 is then displayed in
+    the Streamlit interface.
+
+    :param df: The pandas DataFrame to be analyzed by GPT-4.
+    :return: None. The function outputs GPT-4's response to the Streamlit interface.
+    """
+
     if st.button('Analyze Data with GPT-4'):
-        # Prepare a summary or key information from the dataframe
-        summary = df.describe().to_json()  # Example: Sending a summary
+        summary = df.describe(include='all').to_json()  # Example: Sending a summary
         client = OpenAI(api_key=openai_api_key)
 
         # Construct the message for GPT-4
         message = {"role": "system", "content": f"Analyze this data summary and provide insights: {summary}"}
 
-        # Send the data to GPT-4
         response = client.chat.completions.create(
             model="gpt-4",
             messages=[message]
@@ -175,38 +214,34 @@ def analyze_with_gpt4(df):
 
 if __name__ == "__main__":
     st.markdown("""
-        <style>
-        .title {
-            color: navy;
-        }
-        .subheader {
-            color: navy;
-        }
-        </style>
-        """, unsafe_allow_html=True)
+            <style>
+            body {
+                color: #fff;  /* Adjust text color if needed */
+                background-color: navy;
+            }
+            </style>
+            """, unsafe_allow_html=True)
 
     st.title("Copilot72")
     st.subheader("Our very own data-savvy AI Copilot to accelerate productivity!")
 
-    # # Upload and display file
     df = upload_file()
 
-    # Apply transformations if dataframe is uploaded
     if df is not None:
         df_transformed = transform_dataframe(df)
         if df_transformed is not None:
-            # Download option for transformed dataframe
             aggregate_data(df_transformed)
-            # Analyze with GPT-4
             analyze_with_gpt4(df_transformed)
             download_csv(df_transformed)
 
             st.subheader("Update the DB - create or append to the copilot72db")
             table_name = st.text_input("Enter the name of the table to create in PostgreSQL:")
             if st.button('Create table in postgres'):
-                if table_name:  # Check if table name is entered
-                    create_table_in_postgres(df, table_name)
-                else:
-                    st.error("Please enter a table name.")
-
-
+                # Check to make users are aware of sensitive data's - sensitivity
+                st.warning('Please confirm that no PII, PHI, or CCI data is present in an unencrypted '
+                           'or unobfuscated state.')
+                if st.checkbox('I confirm that no sensitive data is being published in plain form'):
+                    if table_name:
+                        create_table_in_postgres(df, table_name)
+                    else:
+                        st.error("Please enter a table name.")

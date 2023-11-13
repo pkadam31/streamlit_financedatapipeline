@@ -1,0 +1,24 @@
+{
+    "fillna": {
+        "Column1": "Default Value",
+        "Column2": 0
+    },
+    "astype": {
+        "Column2": "string",
+        "Column3": "int64"
+    },
+    "map": {
+        "Column4": {
+            "OldValue1": "NewValue1",
+            "OldValue2": "NewValue2"
+        }
+    },
+    "drop_duplicates": true,
+    "sort_values": {
+        "by": "Column5",
+        "ascending": true
+    },
+    "rename": {
+        "Column6": "RenamedColumn6"
+    }
+}
