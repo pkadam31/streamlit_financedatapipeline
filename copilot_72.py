@@ -234,13 +234,13 @@ if __name__ == "__main__":
             st.subheader("Data Export")
             download_csv(df_transformed)
 
-            st.subheader("Update the DB - create or append to the copilot72db")
-            table_name = st.text_input("Enter the name of the table to create in PostgreSQL:")
+            st.text_input("Update the DB - create or append your data into the Copilot72DB")
             if st.button('Create table in postgres'):
                 # Check to make users are aware of sensitive data's - sensitivity
                 st.warning('Please confirm that no PII, PHI, or CCI data is present in an unencrypted '
                            'or unobfuscated state.')
                 if st.checkbox('I confirm that no sensitive data is being published in plain form'):
+                    table_name = st.text_input("Enter the name of the table to create in PostgreSQL:")
                     if table_name:
                         create_table_in_postgres(df, table_name)
                     else:
