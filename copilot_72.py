@@ -29,10 +29,8 @@ def get_db_connection():
 
 def create_table_in_postgres(df, table_name):
     try:
-        engine = sqlalchemy.create_engine(
-            f'postgresql+psycopg2://{gcp_postgres_user}:{gcp_postgres_password}'
-            f'@{gcp_postgres_host}/{gcp_postgres_dbname}'
-        )
+        connection_string = "postgresql+psycopg2://" + gcp_postgres_user + ":" + gcp_postgres_password + "@" + gcp_postgres_host + "/" + gcp_postgres_dbname
+        engine = sqlalchemy.create_engine(connection_string) # improve - use urlib
         df.to_sql(table_name, engine, if_exists='append', index=False)
         st.success(f"Table '{table_name}' updated successfully in PostgreSQL")
     except Exception as e:
