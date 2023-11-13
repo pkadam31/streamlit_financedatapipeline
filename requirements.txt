@@ -6,4 +6,4 @@ configparser>=5.0.2
 pyspark==3.3.0
 pyarrow==7.0.0
 sqlalchemy
-urllib
+
