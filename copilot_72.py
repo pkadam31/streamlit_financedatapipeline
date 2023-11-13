@@ -33,9 +33,11 @@ def create_table_in_postgres(df, table_name):
 
         safe_username = quote_plus(gcp_postgres_user)
         safe_password = quote_plus(gcp_postgres_password)
+        safe_host = quote_plus(gcp_postgres_host)
+        safe_dbname = quote_plus(gcp_postgres_dbname)
 
         engine = sqlalchemy.create_engine(
-            f'postgresql+psycopg2://{safe_username}:{safe_password}@{gcp_postgres_host}/{gcp_postgres_dbname}'
+            f'postgresql+psycopg2://{safe_username}:{safe_password}@{safe_host}/{safe_dbname}'
         )
 
         df.to_sql(table_name, engine, if_exists='append', index=False)
