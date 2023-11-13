@@ -32,14 +32,10 @@ def create_table_in_postgres(df, table_name):
     try:
 
         safe_username = quote_plus(gcp_postgres_user)
-        safe_password = quote_plus(gcp_postgres_password).replace("%40", "@")
-
-        st.write(safe_username)
-        st.write(safe_password)
+        safe_password = quote_plus(gcp_postgres_password)
 
         engine = sqlalchemy.create_engine(
-            f'postgresql+psycopg2://{safe_username}:{safe_password}'
-            f'@{gcp_postgres_host}/{gcp_postgres_dbname}'
+            f'postgresql+psycopg2://{safe_username}:{safe_password}@{gcp_postgres_host}/{gcp_postgres_dbname}'
         )
 
         df.to_sql(table_name, engine, if_exists='append', index=False)
