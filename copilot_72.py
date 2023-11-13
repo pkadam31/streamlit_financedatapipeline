@@ -76,6 +76,10 @@ def transform_dataframe(df):
     if json_file:
         transformations = json.load(json_file)
 
+        if 'fillna' in transformations:
+            for column, value in transformations['fillna'].items():
+                df_transformed[column] = df_transformed[column].fillna(value)
+
         if 'astype' in transformations:
             for column, dtype in transformations['astype'].items():
                 df_transformed[column] = df_transformed[column].astype(dtype)
@@ -91,10 +95,6 @@ def transform_dataframe(df):
         if 'sort_values' in transformations:
             sort_params = transformations['sort_values']
             df_transformed = df_transformed.sort_values(by=sort_params['by'], ascending=sort_params['ascending'])
-
-        if 'fillna' in transformations:
-            for column, value in transformations['fillna'].items():
-                df_transformed[column] = df_transformed[column].fillna(value)
 
         if 'rename' in transformations:
             df_transformed = df_transformed.rename(columns=transformations['rename'])
