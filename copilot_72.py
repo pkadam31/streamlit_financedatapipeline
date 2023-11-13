@@ -60,7 +60,7 @@ def upload_file():
             df = pd.read_csv(uploaded_file)
         elif uploaded_file.type == "application/octet-stream":
             df = pd.read_parquet(uploaded_file, engine='pyarrow')
-        st.write(df.head(25))
+        st.write(df.head(10))
         st.write(df.dtypes)
         return df
     return None
@@ -73,7 +73,7 @@ def transform_dataframe(df):
     df = df.head(10)
 
     json_file = st.file_uploader("Upload JSON for transformation", type=["json"])
-    if json_file is not None:
+    if json_file:
         transformations = json.load(json_file)
 
         # Apply astype transformations
