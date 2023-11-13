@@ -1,3 +1,4 @@
+import sqlalchemy
 import streamlit as st
 import pandas as pd
 import psycopg2
@@ -26,17 +27,16 @@ def get_db_connection():
     )
 
 
-def execute_sql_query(cursor, sql_query):
-    """
-    Executes the provided SQL query and returns the results.
-    :param cursor: The database cursor object.
-    :param sql_query: The SQL query to execute.
-    :return: A tuple containing the raw result and a DataFrame representation of the result.
-    """
-    cursor.execute(sql_query)
-    result = cursor.fetchall()
-    column_names = [desc[0] for desc in cursor.description]
-    return result, pd.DataFrame(result, columns=column_names)
+def create_table_in_postgres(df, table_name):
+    try:
+        engine = sqlalchemy.create_engine(
+            f'postgresql+psycopg2://{gcp_postgres_user}:{gcp_postgres_password}'
+            f'@{gcp_postgres_host}/{gcp_postgres_dbname}'
+        )
+        df.to_sql(table_name, engine, if_exists='append', index=False)
+        st.success(f"Table '{table_name}' updated successfully in PostgreSQL")
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
 
 
 def close_db_connection(conn, cursor=None):
@@ -191,4 +191,7 @@ if __name__ == "__main__":
             # Analyze with GPT-4
             analyze_with_gpt4(df_transformed)
             download_csv(df_transformed)
+
+            if st.button('Create table in postgres'):
+                create_table_in_postgres(df, 'test')
 
