@@ -209,6 +209,12 @@ if __name__ == "__main__":
             analyze_with_gpt4(df_transformed)
             download_csv(df_transformed)
 
+            st.subheader("Update the DB - create or append to the copilot72db")
+            table_name = st.text_input("Enter the name of the table to create in PostgreSQL:")
             if st.button('Create table in postgres'):
-                create_table_in_postgres(df, 'test')
+                if table_name:  # Check if table name is entered
+                    create_table_in_postgres(df, table_name)
+                else:
+                    st.error("Please enter a table name.")
+
 
