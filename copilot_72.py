@@ -31,20 +31,10 @@ def get_db_connection():
 def create_table_in_postgres(df, table_name):
     try:
 
-        st.write(gcp_postgres_user)
-        st.write(gcp_postgres_dbname)
-        st.write(gcp_postgres_password)
-        st.write(gcp_postgres_host)
-
         safe_username = quote_plus(gcp_postgres_user)
         safe_password = quote_plus(gcp_postgres_password)
         safe_host = quote_plus(gcp_postgres_host)
         safe_dbname = quote_plus(gcp_postgres_dbname)
-
-        st.write(safe_username)
-        st.write(safe_dbname)
-        st.write(safe_password)
-        st.write(gcp_postgres_host)
 
         engine = sqlalchemy.create_engine(
             f'postgresql+psycopg2://{safe_username}:{safe_password}@{safe_host}/{safe_dbname}'
