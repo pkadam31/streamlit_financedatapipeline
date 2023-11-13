@@ -42,10 +42,9 @@ def create_table_in_postgres(df, table_name):
 
 def upload_file():
     """
-        Uploads a CSV or Parquet file using Streamlit's file uploader and displays its content.
-
-        :return: The DataFrame created from the uploaded file, or None if no file is uploaded.
-        """
+    Uploads a CSV or Parquet file using Streamlit's file uploader and displays its content.
+    :return: The DataFrame created from the uploaded file, or None if no file is uploaded.
+    """
     st.subheader("Upload your data here")
 
     uploaded_file = st.file_uploader("Choose a CSV or Parquet file", type=["csv", "parquet"])
