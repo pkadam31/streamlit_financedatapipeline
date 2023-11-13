@@ -86,8 +86,13 @@ def transform_dataframe(df):
 
         if 'map' in transformations:
             for column, mapping in transformations['map'].items():
-                original_dtype = df_transformed[column].dtype
-                df_transformed[column] = df_transformed[column].astype(str).map(mapping).astype(original_dtype)
+                original_values = df_transformed[column].copy()
+                if pd.api.types.is_numeric_dtype(original_values):
+                    map_transformation = {original_values.dtype.type(k): v for k, v in mapping.items()}
+                else:
+                    map_transformation = mapping
+
+                df_transformed[column] = original_values.map(map_transformation).fillna(original_values)
 
         if transformations.get('drop_duplicates'):
             df_transformed = df_transformed.drop_duplicates()
