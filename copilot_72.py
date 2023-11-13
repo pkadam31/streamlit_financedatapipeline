@@ -31,7 +31,7 @@ def get_db_connection():
 def create_table_in_postgres(df, table_name):
     try:
 
-        print(gcp_postgres_host)
+        print(gcp_postgres_user)
         print(gcp_postgres_dbname)
 
         safe_username = quote_plus(gcp_postgres_user)
@@ -39,7 +39,7 @@ def create_table_in_postgres(df, table_name):
         safe_host = quote_plus(gcp_postgres_host)
         safe_dbname = quote_plus(gcp_postgres_dbname)
 
-        print(safe_host)
+        print(safe_username)
         print(safe_dbname)
 
         engine = sqlalchemy.create_engine(
