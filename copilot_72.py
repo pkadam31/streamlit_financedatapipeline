@@ -83,7 +83,6 @@ def transform_dataframe(df):
 
     sample_transformations = load_app_config()
     sample_transformations_str = json.dumps(sample_transformations, indent=4)
-
     st.download_button("Download Sample JSON file", sample_transformations_str, "sample_transformation.json",
                        "text/plain")
 
@@ -230,7 +229,9 @@ if __name__ == "__main__":
         df_transformed = transform_dataframe(df)
         if df_transformed is not None:
             aggregate_data(df_transformed)
+            st.subheader("Copilot AI Data Analysis")
             analyze_with_gpt4(df_transformed)
+            st.subheader("Data Export")
             download_csv(df_transformed)
 
             st.subheader("Update the DB - create or append to the copilot72db")
