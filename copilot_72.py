@@ -53,14 +53,18 @@ def upload_file():
 
     uploaded_file = st.file_uploader("Choose a CSV or Parquet file", type=["csv", "parquet"])
     if uploaded_file is not None:
-        file_extension = uploaded_file.name.split('.')[-1]
-        if uploaded_file.type == "text/csv":
-            df = pd.read_csv(uploaded_file)
-        elif file_extension.lower() == "parquet":
-            df = pd.read_parquet(uploaded_file, engine='pyarrow')
-        st.write(df.head(10))
-        st.write(df.dtypes)
-        return df
+        try:
+            file_extension = uploaded_file.name.split('.')[-1]
+            if uploaded_file.type == "text/csv":
+                df = pd.read_csv(uploaded_file)
+            elif file_extension.lower() == "parquet":
+                df = pd.read_parquet(uploaded_file, engine='pyarrow')
+            st.write(df.head(10))
+            st.write(df.dtypes)
+            return df
+        except Exception as e:
+            st.error(f"An error occurred while processing the file: {e}")
+            return None
     return None
 
 
