@@ -91,11 +91,11 @@ def transform_dataframe(df):
     st.download_button("Download Sample JSON file", sample_transformations_str, "sample_transformation.json",
                        "text/plain")
 
-    df_transformed = df.copy()
-    df = df.head(10)
-
     json_file = st.file_uploader("Upload JSON for transformation", type=["json"])
     if json_file:
+        df_transformed = df.copy()
+        df = df.head(10)
+        
         transformations = json.load(json_file)
 
         if 'fillna' in transformations:
