@@ -52,10 +52,11 @@ def upload_file():
     st.subheader("Upload your data here")
 
     uploaded_file = st.file_uploader("Choose a CSV or Parquet file", type=["csv", "parquet"])
+    file_extension = uploaded_file.name.split('.')[-1]
     if uploaded_file is not None:
         if uploaded_file.type == "text/csv":
             df = pd.read_csv(uploaded_file)
-        elif uploaded_file.type == "application/octet-stream":
+        elif file_extension.lower() == "parquet":
             df = pd.read_parquet(uploaded_file, engine='pyarrow')
         st.write(df.head(10))
         st.write(df.dtypes)
