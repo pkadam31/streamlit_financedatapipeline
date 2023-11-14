@@ -29,7 +29,7 @@ def create_table_in_postgres(df, table_name):
         safe_dbname = quote_plus(gcp_postgres_dbname)
 
         engine = sqlalchemy.create_engine(
-            f'postgresql+psycopg2://{safe_username}:{safe_password}@{safe_host}/{safe_dbname}'
+            f'postgresql+psycopg2://{safe_username}:{safe_password}@{safe_host}/{safe_dbname}?sslmode=require'
         )
         # Breaks large files into chunks for a more fault-tolerant data transfer
         chunksize = int(len(df) / 10)  # TODO: len(df) done twice
