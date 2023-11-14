@@ -135,6 +135,8 @@ def transform_dataframe(df):
         st.write("Transformed DataFrame:")
         st.dataframe(df_transformed.head(10))
 
+    st.write(df_transformed.dtypes)
+
     return df_transformed
 
 
