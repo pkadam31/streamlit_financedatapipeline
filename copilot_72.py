@@ -235,14 +235,28 @@ if __name__ == "__main__":
             download_csv(df_transformed)
 
             st.subheader("Update the DB - create or append your data into the Copilot72DB")
+
+            if 'create_clicked' not in st.session_state:
+                st.session_state.create_clicked = False
+            if 'confirm_sensitive_data' not in st.session_state:
+                st.session_state.confirm_sensitive_data = False
+
             if st.button('Create table in postgres'):
-                # Check to make users are aware of sensitive data's - sensitivity
-                st.warning('Please confirm that no PII, PHI, or CCI data is present in an unencrypted '
-                           'or unobfuscated state.')
-                if st.checkbox('I confirm that no sensitive data is being published in plain form'):
-                    table_name = st.text_input("Enter the name of the table to create in PostgreSQL:")
+                st.session_state.create_clicked = True
+
+            if st.session_state.create_clicked:
+                st.warning(
+                    'Please confirm that no PII, PHI, or CCI data is present in an unencrypted or unobfuscated state.')
+                if st.checkbox('I confirm that no sensitive data is being published in plain form',
+                               key='confirm_sensitive_data'):
+                    st.session_state.confirm_sensitive_data = True
+                else:
+                    st.session_state.confirm_sensitive_data = False
+
+            if st.session_state.confirm_sensitive_data:
+                table_name = st.text_input("Enter the name of the table to create in PostgreSQL:")
+                if table_name:  # Check if table_name is not empty
                     if st.button('Publish table'):
-                        if table_name:
-                            create_table_in_postgres(df, table_name)
-                        else:
-                            st.error("Please enter a table name.")
+                        create_table_in_postgres(df, table_name)
+                else:
+                    st.error("Please enter a table name.")
