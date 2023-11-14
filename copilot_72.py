@@ -90,15 +90,15 @@ def transform_dataframe(df):
     """
     st.subheader("Data Transformation")
 
-    # sample_transformations = load_app_config()
-    # sample_transformations_str = json.dumps(sample_transformations, indent=4)
-    # st.download_button("Download Sample JSON file", sample_transformations_str, "sample_transformation.json",
-    #                    "text/plain")
+    sample_transformations = load_app_config()
+    sample_transformations_str = json.dumps(sample_transformations, indent=4)
+    st.download_button("Download Sample JSON file", sample_transformations_str, "sample_transformation.json",
+                       "text/plain")
 
     json_file = st.file_uploader("Upload JSON for transformation", type=["json"])
     if json_file:
-        df_transformed = df.copy()
-        df = df.head(10)
+        df_transformed = df
+        df_original = df.head(10).copy()
 
         transformations = json.load(json_file)
 
@@ -134,7 +134,7 @@ def transform_dataframe(df):
     col1, col2 = st.columns(2)
     with col1:
         st.write("Original DataFrame (Top 10 Rows):")
-        st.dataframe(df)
+        st.dataframe(df_original)
 
     with col2:
         st.write("Transformed DataFrame:")
